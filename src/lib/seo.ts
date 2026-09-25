@@ -1,0 +1,9 @@
+export function setPageMeta(title: string, description: string) {
+  document.title = title;
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+  if (meta) meta.content = description;
+  const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+  if (ogTitle) ogTitle.content = title;
+  const ogDescription = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
+  if (ogDescription) ogDescription.content = description;
+}
