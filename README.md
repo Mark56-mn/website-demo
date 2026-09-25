@@ -40,7 +40,7 @@ The development server binds to `0.0.0.0` and Vite injects/uses the available po
 
 ## Environment variables
 
-Copy `env.example` to `.env.local` and replace placeholders. The workspace environment guard may require renaming `env.example` to `.env.example` before committing it. These variables are public build-time values; never place secret payment API keys in any `VITE_*` variable.
+Copy `env.example` to `.env.local` and replace placeholders. The workspace environment guard may require renaming `env.example` to `.env.example` before committing it. The Supabase URL and anon key are intentionally configured as `SUPABASE_*` variables; Vite is configured to expose those public browser values. Never place secret payment API keys or the Supabase service-role key in any browser-visible variable.
 
 | Variable | Purpose |
 | --- | --- |
@@ -50,8 +50,8 @@ Copy `env.example` to `.env.local` and replace placeholders. The workspace envir
 | `VITE_STARTER_PRICE_NAIRA` | Configurable Naira display reference. Defaults to `30000`. This is presentation only, not a live exchange-rate conversion. |
 | `VITE_PAYMENT_URL` | Hosted one-time checkout URL from a real payment provider. |
 | `VITE_ORDER_ENDPOINT` | HTTPS endpoint that accepts the order JSON when Supabase is not configured. |
-| `VITE_SUPABASE_URL` | Public Supabase project URL for Auth and Postgres access. |
-| `VITE_SUPABASE_ANON_KEY` | Public Supabase anon key. It is safe only with the included Row Level Security policies. |
+| `SUPABASE_URL` | Public Supabase project URL for Auth and Postgres access. |
+| `SUPABASE_ANON_KEY` | Public Supabase anon key. It is safe only with the included Row Level Security policies. |
 
 `VITE_PAYMENT_URL` should point to a hosted checkout/payment page, not a secret API endpoint. The order app never marks an order paid from client state. For production, the payment provider’s verified webhook or dashboard should be the source of truth for `PAID` and later statuses.
 
@@ -115,7 +115,7 @@ This repository intentionally keeps payment provider selection open. The UI cons
 4. Use the provider’s verified webhook in a trusted backend/admin workflow to set `PAID` only after confirmation.
 5. Add reconciliation and access controls before marking work as delivered.
 
-Do not paste secret keys into frontend code or `.env.example`.
+Do not paste secret keys into frontend code or `env.example`.
 
 ## Private admin panel
 
@@ -123,7 +123,7 @@ Do not paste secret keys into frontend code or `.env.example`.
 2. Run `supabase/schema.sql` in the Supabase SQL Editor.
 3. Create an email/password user under **Authentication → Users**.
 4. Add that same email to `public.admin_users` using the SQL Editor.
-5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel.
+5. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in Vercel.
 6. Open `/admin/login` and sign in with the private account.
 
 The anon key is public by design and is safe only because the included RLS policies deny anonymous order reads. Do not put a Supabase service-role key in the frontend. The admin view is read-only in V1; order status changes and payment verification remain owner/provider workflows.
