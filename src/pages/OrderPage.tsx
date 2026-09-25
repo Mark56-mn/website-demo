@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import SiteLayout from "../components/SiteLayout";
 import { ArrowRight, Check, Shield } from "../components/Icons";
 import { siteConfig, whatsappUrl } from "../config";
+import { getSupabaseClient } from "../lib/supabase";
 import { setPageMeta } from "../lib/seo";
 import { formatOrderForWhatsApp, initialOrder, submitOrder, validateOrder, type OrderData } from "../lib/order";
 
@@ -39,7 +40,33 @@ export default function OrderPage() {
     }
     setSubmitting(true);
     try {
-      if (siteConfig.orderEndpoint) {
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        const { error } = await supabase.from("orders").insert({
+          business_name: form.businessName,
+          category: form.category,
+          country: form.country,
+          city: form.city,
+          phone: form.phone,
+          email: form.email || null,
+          address: form.address || null,
+          map_url: form.mapUrl || null,
+          description: form.description || null,
+          services: form.services || null,
+          differentiators: form.differentiators || null,
+          opening_hours: form.openingHours || null,
+          style: form.style,
+          facebook_url: form.facebookUrl || null,
+          instagram_url: form.instagramUrl || null,
+          tiktok_url: form.tiktokUrl || null,
+          other_social_url: form.otherSocialUrl || null,
+          asset_links: form.assetLinks || null,
+          notes: form.notes || null,
+          status: "NEW",
+        });
+        if (error) throw new Error(error.message);
+        setStep("payment");
+      } else if (siteConfig.orderEndpoint) {
         const result = await submitOrder(form, siteConfig.orderEndpoint);
         if (!result.ok) throw new Error(result.error);
         setStep("payment");

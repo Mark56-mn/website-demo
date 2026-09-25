@@ -76,6 +76,9 @@ The existing `TASKS/TASK-001-build-v1.md` was preserved.
 - Pre-filled WhatsApp order fallback
 - Hosted payment handoff with no frontend payment secrets
 - V1 order status type including `NEW` and later workflow states
+- Supabase email/password authentication for private admin access
+- Protected `/admin` orders dashboard with metrics, status filtering, expandable request details, and sign out
+- Supabase SQL schema with RLS allowing public order inserts but restricting order reads to allowlisted admin users
 - Basic route-level document title and description updates
 - Semantic headings, labels, alt text, focus states, and keyboard-friendly controls
 - Lazy-loaded demo imagery
@@ -135,13 +138,14 @@ The workspace environment guard blocked direct creation of a file named `.env.ex
 
 ## Incomplete Items
 
-1. Configure the real WhatsApp number.
-2. Select and configure a hosted payment checkout URL.
-3. Configure an HTTPS order endpoint that persists requests.
-4. Add a trusted payment webhook/workflow that changes status to `PAID` only after verification.
-5. Rename `env.example` to `.env.example`.
-6. Run real-browser mobile and desktop checks across all routes and form states.
-7. Deploy to Vercel and verify direct refreshes on nested routes.
+1. Create a Supabase project, run `supabase/schema.sql`, create an Auth user, and add the owner email to `admin_users`.
+2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the sandbox and Vercel production environment.
+3. Configure the real WhatsApp number.
+4. Select and configure a hosted payment checkout URL.
+5. Add a trusted payment webhook/workflow that changes status to `PAID` only after verification.
+6. Rename `env.example` to `.env.example`.
+7. Run real-browser mobile and desktop checks across all routes, login, protected admin access, and form states.
+8. Deploy to Vercel and verify direct refreshes on nested routes.
 
 ## Important Decisions
 

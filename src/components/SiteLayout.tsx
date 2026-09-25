@@ -46,7 +46,7 @@ export default function SiteLayout({ children, theme = "business" }: { children:
           </div>
           <div><h3>Explore</h3><Link to="/#demos">Live demos</Link><Link to="/#pricing">Pricing</Link><Link to="/order">Start an order</Link></div>
           <div><h3>Demos</h3><Link to="/demos/cleaning">Cleaning business</Link><Link to="/demos/fashion">Fashion brand</Link><Link to="/demos/real-estate">Real estate</Link></div>
-          <div><h3>Contact</h3>{chat ? <a href={chat} target="_blank" rel="noreferrer">Chat on WhatsApp</a> : <span>WhatsApp setup required</span>}<span>Mon–Sat, 9am–6pm</span></div>
+          <div><h3>Contact</h3>{chat ? <a href={chat} target="_blank" rel="noreferrer">Chat on WhatsApp</a> : <span>WhatsApp setup required</span>}<span>Mon–Sat, 9am–6pm</span><Link to="/admin/login">Admin login</Link></div>
         </div>
         <div className="container footer-bottom"><span>© {new Date().getFullYear()} Website Demo</span><span>Built mobile-first for busy business owners.</span></div>
       </footer>

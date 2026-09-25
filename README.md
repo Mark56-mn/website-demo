@@ -18,12 +18,13 @@ The V1 deliberately excludes customer accounts, a CRM, complex databases, full e
 - React + TypeScript
 - Vite
 - React Router
+- Supabase Auth and Postgres for the private email/password admin panel
 - Plain responsive CSS with reusable design tokens
 - Vitest for unit tests
 - ESLint and TypeScript project builds
 - Vercel-compatible static hosting
 
-No authentication, database, or server runtime is required for the public portfolio. Order delivery and payments use configurable external HTTPS endpoints/hosted checkout links so payment secrets are never exposed in the browser.
+No authentication is required for the public portfolio. When Supabase is configured, the order form stores requests in Supabase and `/admin` is protected with Supabase email/password authentication plus Row Level Security. Payment secrets are never exposed in the browser.
 
 ## Local development
 
@@ -48,11 +49,13 @@ Copy `env.example` to `.env.local` and replace placeholders. The workspace envir
 | `VITE_STARTER_PRICE_USD` | Configurable USD display price. Defaults to `20`. |
 | `VITE_STARTER_PRICE_NAIRA` | Configurable Naira display reference. Defaults to `30000`. This is presentation only, not a live exchange-rate conversion. |
 | `VITE_PAYMENT_URL` | Hosted one-time checkout URL from a real payment provider. |
-| `VITE_ORDER_ENDPOINT` | HTTPS endpoint that accepts the order JSON and records it. |
+| `VITE_ORDER_ENDPOINT` | HTTPS endpoint that accepts the order JSON when Supabase is not configured. |
+| `VITE_SUPABASE_URL` | Public Supabase project URL for Auth and Postgres access. |
+| `VITE_SUPABASE_ANON_KEY` | Public Supabase anon key. It is safe only with the included Row Level Security policies. |
 
 `VITE_PAYMENT_URL` should point to a hosted checkout/payment page, not a secret API endpoint. The order app never marks an order paid from client state. For production, the payment provider’s verified webhook or dashboard should be the source of truth for `PAID` and later statuses.
 
-If both `VITE_ORDER_ENDPOINT` and `VITE_WHATSAPP_NUMBER` are absent, the order page displays a configuration error rather than discarding details. If no order endpoint is configured but WhatsApp is, it offers a pre-filled WhatsApp delivery path.
+If Supabase is configured, validated orders are inserted into the protected `orders` table and the owner can review them at `/admin`. The public form only uses the anon key; Row Level Security allows public inserts but restricts reads to authenticated users in the `admin_users` allowlist. If Supabase is not configured, the existing external endpoint or WhatsApp fallback remains available. If both order delivery methods are absent, the order page displays a configuration error rather than discarding details.
 
 ## Verification
 
@@ -88,13 +91,15 @@ No payment secret belongs in `VITE_*` variables or committed files.
 - `/demos/fashion` — Zuri Fashion fictional fashion-brand demo
 - `/demos/real-estate` — PrimeNest Properties fictional property demo
 - `/order` — mobile-friendly intake and payment handoff
+- `/admin/login` — private email/password admin login
+- `/admin` — protected orders dashboard
 
 ## Order flow
 
 1. The customer completes required business/contact fields and optional content, style, links, and notes.
 2. The app validates required fields, phone, optional email, URLs, and reasonable text lengths.
-3. If `VITE_ORDER_ENDPOINT` exists, the form sends JSON with `status: NEW` and an ISO submission timestamp.
-4. If no order endpoint exists but WhatsApp is configured, the form prepares a complete, pre-filled WhatsApp message. The user must send it.
+3. When Supabase is configured, the form inserts a `NEW` order into Supabase using the public anon key and RLS insert policy.
+4. Without Supabase, `VITE_ORDER_ENDPOINT` receives the JSON order. If neither is configured, WhatsApp can receive a pre-filled message so details are not silently lost.
 5. The customer proceeds to a configured hosted checkout link.
 6. A verified provider webhook/dashboard—not the client—must later update status to `PAID`, `BUILDING`, etc.
 
@@ -112,6 +117,17 @@ This repository intentionally keeps payment provider selection open. The UI cons
 
 Do not paste secret keys into frontend code or `.env.example`.
 
+## Private admin panel
+
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in the Supabase SQL Editor.
+3. Create an email/password user under **Authentication → Users**.
+4. Add that same email to `public.admin_users` using the SQL Editor.
+5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel.
+6. Open `/admin/login` and sign in with the private account.
+
+The anon key is public by design and is safe only because the included RLS policies deny anonymous order reads. Do not put a Supabase service-role key in the frontend. The admin view is read-only in V1; order status changes and payment verification remain owner/provider workflows.
+
 ## Customizing the demos
 
 The shared portfolio structure lives in `src/components/DemoShell.tsx`. Each fictional business has a focused page in `src/pages/demos/`:
@@ -128,10 +144,12 @@ Demo images are loaded from Unsplash and resized by its image CDN. They are pres
 
 ## Known limitations
 
-- No hosted order backend is bundled; `VITE_ORDER_ENDPOINT` must be configured to persist submissions.
+- No hosted order backend is bundled; Supabase is the recommended private admin backend and must be configured, or `VITE_ORDER_ENDPOINT` can be used instead.
+- Supabase setup is documented but not executed in this repository; the project owner must create the project, run the SQL, and add the admin email.
+- The admin panel is read-only in V1; it does not update order statuses or verify payments.
 - No live payment provider is bundled; `VITE_PAYMENT_URL` must be configured for checkout.
 - The Naira amount is a configurable display reference, not a live exchange-rate conversion.
 - Assets are collected as links rather than uploaded in this V1.
-- V1 has no admin dashboard, automated payment webhooks, accounts, or order-management UI.
+- V1 has no automated payment webhooks, accounts, or status-editing controls.
 - Testimonials, properties, products, prices, and business details in the demos are explicitly fictional.
 - Per-page metadata is managed client-side for this SPA. A prerender/SSR system can be added later if server-delivered SEO metadata is required.

@@ -4,6 +4,9 @@ import OrderPage from "./pages/OrderPage";
 import CleaningDemo from "./pages/demos/CleaningDemo";
 import FashionDemo from "./pages/demos/FashionDemo";
 import RealEstateDemo from "./pages/demos/RealEstateDemo";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminPage from "./pages/AdminPage";
+import ProtectedRoute from "./pages/ProtectedRoute";
 import { Link } from "react-router-dom";
 
 function NotFound() {
@@ -18,6 +21,10 @@ export default function App() {
       <Route path="/demos/cleaning" element={<CleaningDemo />} />
       <Route path="/demos/fashion" element={<FashionDemo />} />
       <Route path="/demos/real-estate" element={<RealEstateDemo />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin" element={<AdminPage />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
