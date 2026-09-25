@@ -100,7 +100,7 @@ The existing `TASKS/TASK-001-build-v1.md` was preserved.
 
 - Vercel deployment: NOT TESTED
 - Deployment URL: Not available
-- Vercel configuration: `vercel.json` includes SPA route rewrites
+- Vercel configuration: `vercel.json` explicitly sets Bun install/build commands, `dist` output, and SPA route rewrites
 - Production build command: `bun run build`
 - Install command: `bun install`
 - Preview command: `bun run dev`
